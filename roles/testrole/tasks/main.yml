@@ -1,0 +1,14 @@
+---
+# tasks file for your_role_name
+
+- name: Ensure a file is present on Linux
+  file:
+    path: /tmp/testfile
+    state: touch
+  when: ansible_os_family != 'Windows'
+
+- name: Ensure a file is present on Windows
+  win_file:
+    path: C:\temp\testfile.txt
+    state: touch
+  when: ansible_os_family == 'Windows'

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, centos-latest, debian-latest]
+        include:
+          - os: ubuntu-latest
+            docker_image: ubuntu:latest
+          - os: windows-latest
+            docker_image: mcr.microsoft.com/windows/servercore:ltsc2019
+          - os: centos-latest
+            docker_image: centos:latest
+          - os: debian-latest
+            docker_image: debian:latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v1
+
+    - name: Run Ansible Role
+      run: |
+        docker run --rm -v $(pwd):/ansible-role ${matrix.docker_image} /bin/bash -c "
+          apt-get update && apt-get install -y ansible
+          ansible-playbook -i 'localhost,' -c local /ansible-role/test.yml
+        "
